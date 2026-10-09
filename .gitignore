@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+.next/
+out/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Tooling and caches
+.cache/
+.eslintcache
+.prettiercache
+.turbo/
+.vite/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Test output
+playwright-report/
+test-results/
+
+# Local database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Postman
+.postman/
+*postman_environment.json
