@@ -16,7 +16,7 @@ export interface IUser extends Document {
   };
   location?: {
     type: 'Point';
-    coordinates: number[]; // [longitude, latitude]
+    coordinates: number[];
   };
   providerProfile?: {
     skills: string[];
@@ -78,10 +78,10 @@ const UserSchema: Schema<IUser> = new Schema(
   { timestamps: true }
 );
 
-// Geospatial index for travel guards and proximity search
+
 UserSchema.index({ location: '2dsphere' });
 
-// Text index for Admin CRM search
+
 UserSchema.index({ name: 'text', email: 'text' });
 
 export default mongoose.model<IUser>('User', UserSchema);

@@ -3,3 +3,9 @@ export enum UserRole {
   PROVIDER = 'PROVIDER',
   ADMIN = 'ADMIN',
 }
+
+export enum KycStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
