@@ -8,6 +8,8 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import UsersPage from './pages/admin/UsersPage';
 import Dashboard from './pages/Dashboard';
+import Header from './components/Header';
+import Footer from './components/Footer';
 import './styles.css';
 
 interface ProtectedRouteProps {
@@ -42,57 +44,65 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <BrowserRouter>
-      <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-      <Routes>
-        {/* Public auth routes */}
-        <Route
-          path="/login"
-          element={
-            <PublicOnlyRoute>
-              <LoginPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicOnlyRoute>
-              <RegisterPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route path="/verify-otp" element={<VerifyOtpPage />} />
-        <Route
-          path="/forgot-password"
-          element={
-            <PublicOnlyRoute>
-              <ForgotPasswordPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <div className="app-shell">
+        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+        <Header />
 
-        {/* Protected app routes */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <ProtectedRoute requiredRole="ADMIN">
-              <UsersPage />
-            </ProtectedRoute>
-          }
-        />
+        <main className="main-content">
+          <Routes>
+            {/* Public auth routes */}
+            <Route
+              path="/login"
+              element={
+                <PublicOnlyRoute>
+                  <LoginPage />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicOnlyRoute>
+                  <RegisterPage />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
+            <Route
+              path="/forgot-password"
+              element={
+                <PublicOnlyRoute>
+                  <ForgotPasswordPage />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+            {/* Protected app routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute requiredRole="ADMIN">
+                  <UsersPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+
+        <Footer />
+      </div>
     </BrowserRouter>
   );
 }

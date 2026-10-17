@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import { useLoginMutation } from '../../store/api/authApi';
 import { setCredentials } from '../../store/slices/authSlice';
 import { useAppDispatch } from '../../store/hooks';
+import PasswordInput from '../../components/PasswordInput';
+import { validateEmail, validatePassword } from '../../utils/validation';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -14,10 +16,32 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+  });
+
+  const emailError = touched.email ? validateEmail(email) : null;
+  const passwordError = touched.password ? validatePassword(password) : null;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    setTouched({ email: true, password: true });
+
+    const eErr = validateEmail(email);
+    const pErr = validatePassword(password);
+
+    if (eErr || pErr) {
+      toast.error(eErr || pErr || 'Please check the form for errors');
+      return;
+    }
+
     try {
-      const res = await login({ email, password }).unwrap();
+      const res = await login({
+        email: email.trim().toLowerCase(),
+        password,
+      }).unwrap();
       const { user, accessToken } = res.data;
       dispatch(setCredentials({ user, accessToken }));
       toast.success(`Welcome back, ${user.name}!`);
@@ -32,7 +56,7 @@ const LoginPage = () => {
 
   return (
     <div className="centered">
-      <form className="form-card" onSubmit={handleSubmit}>
+      <form className="form-card" onSubmit={handleSubmit} noValidate>
         <h2>Sign In</h2>
 
         <div className="form-group">
@@ -42,21 +66,39 @@ const LoginPage = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
             placeholder="you@example.com"
+            autoComplete="email"
+            className={emailError ? 'input-error' : ''}
+            aria-invalid={Boolean(emailError)}
+            aria-describedby={emailError ? 'email-error' : undefined}
             required
           />
+          {emailError && (
+            <span id="email-error" className="error-text">
+              {emailError}
+            </span>
+          )}
         </div>
 
         <div className="form-group">
           <label htmlFor="password">Password</label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
             placeholder="••••••"
+            autoComplete="current-password"
+            isInvalid={Boolean(passwordError)}
+            ariaDescribedBy={passwordError ? 'password-error' : undefined}
             required
           />
+          {passwordError && (
+            <span id="password-error" className="error-text">
+              {passwordError}
+            </span>
+          )}
         </div>
 
         <button type="submit" className="btn btn-primary" disabled={isLoading}>
