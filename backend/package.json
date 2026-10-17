@@ -13,8 +13,14 @@
   "license": "ISC",
   "author": "Jason Dev",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "seed:admin": "tsx src/scripts/seedAdmin.ts",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

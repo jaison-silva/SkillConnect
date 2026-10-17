@@ -39,19 +39,4 @@ export class AdminCrmController {
       next(error);
     }
   };
-
-  updateProviderKyc = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const userId = String(req.params.id);
-      const { kycStatus } = req.body;
-      const result = await this.crmService.updateProviderKyc(userId, kycStatus);
-      res.status(200).json({ status: 'success', data: result });
-    } catch (error) {
-      next(error);
-    }
-  };
 }

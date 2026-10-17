@@ -46,7 +46,7 @@ export class AuthService implements IAuthService {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(data.password, salt);
         const { otpCode, codeHash, expiresAt } = await this.generateOtpPayload(5);
-
+ 
         const user = await this.userRepo.create({
             name: data.name,
             email: data.email,
@@ -122,6 +122,7 @@ export class AuthService implements IAuthService {
         }
 
         const isValid = await bcrypt.compare(data.otp, user.otp.codeHash);
+        console.log(`OTP verification for ${data.email}: ${isValid ? 'valid' : 'invalid'}`);
         if (!isValid) {
             throw new AppError('Invalid OTP code.', 400);
         }

@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { KycStatus, UserRole } from '../constants/enums.js';
+import { UserRole } from '../constants/enums.js';
 
 export class CrmQueryDTO {
   @IsOptional()
@@ -34,21 +34,10 @@ export class CrmQueryDTO {
   isBlocked?: string;
 
   @IsOptional()
-  @IsEnum(KycStatus)
-  kycStatus?: KycStatus;
-
-  @IsOptional()
   @IsIn(['createdAt', 'name', 'email', 'strikeCount'])
   sortBy?: string;
 
   @IsOptional()
   @IsIn(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc';
-}
-
-export class UpdateKycDTO {
-  @IsEnum(KycStatus, {
-    message: 'kycStatus must be PENDING, APPROVED, or REJECTED',
-  })
-  kycStatus!: KycStatus;
 }

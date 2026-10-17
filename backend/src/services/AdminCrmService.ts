@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../constants/types.js';
-import { KycStatus, UserRole } from '../constants/enums.js';
+import { UserRole } from '../constants/enums.js';
 
 import type {
   CrmFilterOptions,
@@ -30,7 +30,6 @@ export class AdminCrmService implements IAdminCrmService {
 
     if (query.search) filters.search = query.search.trim();
     if (query.role) filters.role = query.role;
-    if (query.kycStatus) filters.kycStatus = query.kycStatus;
     if (query.isVerified !== undefined) {
       filters.isVerified = query.isVerified === 'true';
     }
@@ -77,27 +76,6 @@ export class AdminCrmService implements IAdminCrmService {
       userId: String(updated?._id),
       isBlocked: Boolean(updated?.isBlocked),
       message: `User has been ${statusText} successfully.`,
-    };
-  }
-
-  async updateProviderKyc(userId: string, kycStatus: KycStatus) {
-    const user = await this.userRepo.findById(userId);
-    if (!user) {
-      throw new AppError('User not found.', 404);
-    }
-
-    if (user.role !== UserRole.PROVIDER) {
-      throw new AppError('KYC status only applies to PROVIDER accounts.', 400);
-    }
-
-    const updated = await this.userRepo.updateById(userId, {
-      'providerProfile.kycStatus': kycStatus,
-    });
-
-    return {
-      userId: String(updated?._id),
-      kycStatus: updated?.providerProfile?.kycStatus || kycStatus,
-      message: `Provider KYC status updated to ${kycStatus}.`,
     };
   }
 }

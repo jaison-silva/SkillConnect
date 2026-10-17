@@ -1,6 +1,6 @@
 import { UpdateQuery } from 'mongoose';
 import { IUser } from '../models/User.js';
-import { KycStatus, UserRole } from '../constants/enums.js';
+import { UserRole } from '../constants/enums.js';
 
 export interface PaginatedUsersResult {
   users: IUser[];
@@ -12,7 +12,6 @@ export interface CrmFilterOptions {
   role?: UserRole;
   isVerified?: boolean;
   isBlocked?: boolean;
-  kycStatus?: KycStatus;
 }
 
 export interface IUserRepository {

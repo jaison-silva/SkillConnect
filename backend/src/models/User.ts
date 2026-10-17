@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { KycStatus, UserRole } from '../constants/enums.js';
+import { UserRole } from '../constants/enums.js';
 
 export interface IUser extends Document {
   name: string;
@@ -21,7 +21,6 @@ export interface IUser extends Document {
   providerProfile?: {
     skills: string[];
     hourlyRate: number;
-    kycStatus: KycStatus;
     connectedAccountId?: string;
   };
   createdAt: Date;
@@ -45,7 +44,7 @@ const UserSchema: Schema<IUser> = new Schema(
       required: true,
       index: true,
     },
-    googleId: { type: String, sparse: true },
+    googleId: { type: String, sparse: true }, 
     isVerified: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
     strikeCount: { type: Number, default: 0 },
@@ -67,11 +66,6 @@ const UserSchema: Schema<IUser> = new Schema(
     providerProfile: {
       skills: [{ type: String }],
       hourlyRate: { type: Number, default: 0 },
-      kycStatus: {
-        type: String,
-        enum: Object.values(KycStatus),
-        default: KycStatus.PENDING,
-      },
       connectedAccountId: { type: String },
     },
   },

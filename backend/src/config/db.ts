@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import { logger } from '../utils/logger.js';
+
+dotenv.config();
 
 export const connectDB = async (): Promise<void> => {
   const MONGO_URI = process.env.MONGO_URI;
@@ -21,3 +24,8 @@ export const connectDB = async (): Promise<void> => {
     process.exit(1);
   }
 };
+
+
+connectDB();
+
+export default connectDB;

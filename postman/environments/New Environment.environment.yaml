@@ -2,3 +2,4 @@ name: New Environment
 values:
   - key: BaseUrl
     value: ''
+color: 120

@@ -20,7 +20,7 @@ export class UserRepository
   async findByEmail(email: string): Promise<IUser | null> {
     return await this.findOne({ email: email.toLowerCase() });
   }
-
+ 
   async findPaginatedUsers(
     filters: CrmFilterOptions,
     skip: number,
@@ -42,10 +42,6 @@ export class UserRepository
 
     if (typeof filters.isBlocked === 'boolean') {
       query.isBlocked = filters.isBlocked;
-    }
-
-    if (filters.kycStatus) {
-      query['providerProfile.kycStatus'] = filters.kycStatus;
     }
 
     if (filters.search) {

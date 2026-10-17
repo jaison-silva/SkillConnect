@@ -5,7 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import { connectDB } from './config/db.js';
+import './config/db.js';
 import { logger, morganStream } from './utils/logger.js';
 import authRoutes from './routes/auth.routes.js';
 import crmRoutes from './routes/crm.routes.js';
@@ -40,11 +40,6 @@ app.use('/api/admin/crm', crmRoutes);
 app.use(errorHandler);
 
 
-const startServer = async () => {
-  await connectDB();
-  app.listen(PORT, () => {
-    logger.info(`🚀 SkillConnect Server running on http://localhost:${PORT}`);
-  });
-};
-
-startServer();
+app.listen(PORT, () => {
+  logger.info(`🚀 SkillConnect Server running on http://localhost:${PORT}`);
+});
