@@ -18,7 +18,7 @@ import { AppError } from '../utils/AppError.js';
 @injectable()
 export class AdminCrmService implements IAdminCrmService {
   constructor(
-    @inject(TYPES.UserRepository) private readonly userRepo: IUserRepository
+    @inject(TYPES.UserRepository) private readonly _userRepo: IUserRepository
   ) {}
 
   async getUsers(query: CrmQueryDTO): Promise<CrmUsersResponse> {
@@ -40,7 +40,7 @@ export class AdminCrmService implements IAdminCrmService {
     const sortBy = query.sortBy || 'createdAt';
     const sortOrder = query.sortOrder || 'desc';
 
-    const { users, total } = await this.userRepo.findPaginatedUsers(
+    const { users, total } = await this._userRepo.findPaginatedUsers(
       filters,
       skip,
       limit,
@@ -58,7 +58,7 @@ export class AdminCrmService implements IAdminCrmService {
   }
 
   async toggleBlockUser(userId: string) {
-    const user = await this.userRepo.findById(userId);
+    const user = await this._userRepo.findById(userId);
     if (!user) {
       throw new AppError('User not found.', 404);
     }
@@ -67,7 +67,7 @@ export class AdminCrmService implements IAdminCrmService {
       throw new AppError('Cannot block an ADMIN account.', 403);
     }
 
-    const updated = await this.userRepo.updateById(userId, {
+    const updated = await this._userRepo.updateById(userId, {
       isBlocked: !user.isBlocked,
     });
 

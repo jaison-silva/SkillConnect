@@ -6,7 +6,7 @@ import type { IAuthService } from '../interface/IAuthService.js';
 @injectable()
 export class AuthController {
   constructor(
-    @inject(TYPES.AuthService) private readonly authService: IAuthService
+    @inject(TYPES.AuthService) private readonly _authService: IAuthService
   ) {}
 
   register = async (
@@ -15,7 +15,7 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await this.authService.register(req.body);
+      const result = await this._authService.register(req.body);
       res.status(201).json({ status: 'success', data: result });
     } catch (error) {
       next(error);
@@ -28,7 +28,7 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const { user, accessToken, refreshToken } = await this.authService.login(
+      const { user, accessToken, refreshToken } = await this._authService.login(
         req.body
       );
 
@@ -54,7 +54,7 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await this.authService.verifyOtp(req.body);
+      const result = await this._authService.verifyOtp(req.body);
       res.status(200).json({ status: 'success', data: result });
     } catch (error) {
       next(error);
@@ -67,7 +67,7 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await this.authService.resendOtp(req.body);
+      const result = await this._authService.resendOtp(req.body);
       res.status(200).json({ status: 'success', data: result });
     } catch (error) {
       next(error);
@@ -80,7 +80,7 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await this.authService.forgotPassword(req.body);
+      const result = await this._authService.forgotPassword(req.body);
       res.status(200).json({ status: 'success', data: result });
     } catch (error) {
       next(error);
@@ -93,7 +93,7 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await this.authService.resetPassword(req.body);
+      const result = await this._authService.resetPassword(req.body);
       res.status(200).json({ status: 'success', data: result });
     } catch (error) {
       next(error);
@@ -107,7 +107,7 @@ export class AuthController {
   ): Promise<void> => {
     try {
       const token = req.cookies?.refreshToken as string;
-      const result = await this.authService.refreshAccessToken(token);
+      const result = await this._authService.refreshAccessToken(token);
       res.status(200).json({ status: 'success', data: result });
     } catch (error) {
       next(error);

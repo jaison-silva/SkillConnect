@@ -8,7 +8,7 @@ import { CrmQueryDTO } from '../dtos/crm.dto.js';
 export class AdminCrmController {
   constructor(
     @inject(TYPES.AdminCrmService)
-    private readonly crmService: IAdminCrmService
+    private readonly _crmService: IAdminCrmService
   ) {}
 
   getUsers = async (
@@ -17,7 +17,7 @@ export class AdminCrmController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await this.crmService.getUsers(
+      const result = await this._crmService.getUsers(
         req.query as unknown as CrmQueryDTO
       );
       res.status(200).json({ status: 'success', data: result });
@@ -33,7 +33,7 @@ export class AdminCrmController {
   ): Promise<void> => {
     try {
       const userId = String(req.params.id);
-      const result = await this.crmService.toggleBlockUser(userId);
+      const result = await this._crmService.toggleBlockUser(userId);
       res.status(200).json({ status: 'success', data: result });
     } catch (error) {
       next(error);

@@ -26,10 +26,10 @@ import { logger } from '../utils/logger.js';
 @injectable()
 export class AuthService implements IAuthService {
     constructor(
-        @inject(TYPES.UserRepository) private readonly userRepo: IUserRepository
+        @inject(TYPES.UserRepository) private readonly _userRepo: IUserRepository
     ) { }
 
-    private async generateOtpPayload(ttlMinutes = 5) {
+    private async _generateOtpPayload(ttlMinutes = 5) {
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         const salt = await bcrypt.genSalt(10);
         const codeHash = await bcrypt.hash(otpCode, salt);
@@ -38,16 +38,16 @@ export class AuthService implements IAuthService {
     }
 
     async register(data: RegisterDTO) {
-        const existing = await this.userRepo.findByEmail(data.email);
+        const existing = await this._userRepo.findByEmail(data.email);
         if (existing) {
             throw new AppError('Email is already registered.', 409);
         }
 
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(data.password, salt);
-        const { otpCode, codeHash, expiresAt } = await this.generateOtpPayload(5);
+        const { otpCode, codeHash, expiresAt } = await this._generateOtpPayload(5);
  
-        const user = await this.userRepo.create({
+        const user = await this._userRepo.create({
             name: data.name,
             email: data.email,
             passwordHash,
@@ -67,7 +67,7 @@ export class AuthService implements IAuthService {
     }
 
     async login(data: LoginDTO): Promise<AuthTokensResponse> {
-        const user = await this.userRepo.findByEmail(data.email);
+        const user = await this._userRepo.findByEmail(data.email);
         if (!user) {
             throw new AppError('Invalid email or password.', 401);
         }
@@ -112,7 +112,7 @@ export class AuthService implements IAuthService {
     }
 
     async verifyOtp(data: VerifyOtpDTO) {
-        const user = await this.userRepo.findByEmail(data.email);
+        const user = await this._userRepo.findByEmail(data.email);
         if (!user || !user.otp?.codeHash || !user.otp?.expiresAt) {
             throw new AppError('No active OTP request found for this email.', 400);
         }
@@ -127,7 +127,7 @@ export class AuthService implements IAuthService {
             throw new AppError('Invalid OTP code.', 400);
         }
 
-        await this.userRepo.updateById(String(user._id), {
+        await this._userRepo.updateById(String(user._id), {
             isVerified: true,
             $unset: { otp: 1 },
         });
@@ -136,14 +136,14 @@ export class AuthService implements IAuthService {
     }
 
     async resendOtp(data: ResendOtpDTO) {
-        const user = await this.userRepo.findByEmail(data.email);
+        const user = await this._userRepo.findByEmail(data.email);
         if (!user) {
             throw new AppError('User not found.', 404);
         }
 
-        const { otpCode, codeHash, expiresAt } = await this.generateOtpPayload(5);
+        const { otpCode, codeHash, expiresAt } = await this._generateOtpPayload(5);
 
-        await this.userRepo.updateById(String(user._id), {
+        await this._userRepo.updateById(String(user._id), {
             otp: { codeHash, expiresAt },
         });
 
@@ -154,16 +154,16 @@ export class AuthService implements IAuthService {
     }
 
     async forgotPassword(data: ForgotPasswordDTO) {
-        const user = await this.userRepo.findByEmail(data.email);
+        const user = await this._userRepo.findByEmail(data.email);
         if (!user) {
             return {
                 message: 'If that email is registered, a reset OTP has been sent.',
             };
         }
 
-        const { otpCode, codeHash, expiresAt } = await this.generateOtpPayload(10);
+        const { otpCode, codeHash, expiresAt } = await this._generateOtpPayload(10);
 
-        await this.userRepo.updateById(String(user._id), {
+        await this._userRepo.updateById(String(user._id), {
             otp: { codeHash, expiresAt },
         });
 
@@ -174,7 +174,7 @@ export class AuthService implements IAuthService {
     }
 
     async resetPassword(data: ResetPasswordDTO) {
-        const user = await this.userRepo.findByEmail(data.email);
+        const user = await this._userRepo.findByEmail(data.email);
         if (!user || !user.otp?.codeHash || !user.otp?.expiresAt) {
             throw new AppError('Invalid or expired password reset request.', 400);
         }
@@ -191,7 +191,7 @@ export class AuthService implements IAuthService {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(data.newPassword, salt);
 
-        await this.userRepo.updateById(String(user._id), {
+        await this._userRepo.updateById(String(user._id), {
             passwordHash,
             isVerified: true,
             $unset: { otp: 1 },
@@ -214,7 +214,7 @@ export class AuthService implements IAuthService {
                 role: string;
             };
 
-            const user = await this.userRepo.findById(decoded.id);
+            const user = await this._userRepo.findById(decoded.id);
             if (!user || user.isBlocked) {
                 throw new AppError('User no longer active or blocked.', 403);
             }
