@@ -2,6 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQuery';
 import type {
   ApiResponse,
+  GoogleAuthRequest,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
@@ -22,6 +23,9 @@ export const authApi = createApi({
     }),
     login: builder.mutation<ApiResponse<LoginResponse>, LoginRequest>({
       query: (body) => ({ url: '/auth/login', method: 'POST', body }),
+    }),
+    googleAuth: builder.mutation<ApiResponse<LoginResponse>, GoogleAuthRequest>({
+      query: (body) => ({ url: '/auth/google', method: 'POST', body }),
     }),
     verifyOtp: builder.mutation<ApiResponse<MessageResponse>, VerifyOtpRequest>({
       query: (body) => ({ url: '/auth/verify-otp', method: 'POST', body }),
@@ -47,6 +51,7 @@ export const authApi = createApi({
 export const {
   useRegisterMutation,
   useLoginMutation,
+  useGoogleAuthMutation,
   useVerifyOtpMutation,
   useResendOtpMutation,
   useForgotPasswordMutation,

@@ -46,7 +46,7 @@ const VerifyOtpPage = () => {
         otp: otp.trim(),
       }).unwrap();
       toast.success(res.data?.message || 'Account verified!');
-      navigate('/login');
+      navigate('/login', { replace: true });
     } catch (err: unknown) {
       const message =
         (err as { data?: { message?: string } })?.data?.message ||

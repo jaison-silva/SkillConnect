@@ -1,6 +1,8 @@
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { NextFunction, Request, Response } from 'express';
+import { HttpStatus } from '../constants/enums.js';
+import { RESPONSE_MESSAGES } from '../constants/messages.js';
 
 export const validateDto = <T extends object>(
   DtoClass: ClassConstructor<T>,
@@ -22,9 +24,9 @@ export const validateDto = <T extends object>(
         .map((err) => Object.values(err.constraints || {}))
         .flat();
 
-      res.status(400).json({
+      res.status(HttpStatus.BAD_REQUEST).json({
         status: 'error',
-        message: errorMessages[0] || 'Validation failed',
+        message: errorMessages[0] || RESPONSE_MESSAGES.SYSTEM.VALIDATION_FAILED,
         errors: errorMessages,
       });
       return;

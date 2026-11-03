@@ -515,3 +515,61 @@ tbody tr:hover {
   justify-content: center;
   flex-wrap: wrap;
 }
+
+/* ===== Google Auth Styles ===== */
+.google-auth-container {
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.25rem 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.auth-divider span {
+  padding: 0 0.75rem;
+}
+
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.google-btn-wrapper.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.google-config-hint {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  color: #475569;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.google-config-hint code {
+  background: #e2e8f0;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}

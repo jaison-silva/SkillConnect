@@ -18,7 +18,7 @@ export const Header = () => {
     }
     dispatch(clearCredentials());
     toast.success('Logged out successfully');
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   const homeLink = isAuthenticated

@@ -20,6 +20,10 @@ export class UserRepository
   async findByEmail(email: string): Promise<IUser | null> {
     return await this.findOne({ email: email.toLowerCase() });
   }
+
+  async findByGoogleId(googleId: string): Promise<IUser | null> {
+    return await this.findOne({ googleId });
+  }
  
   async findPaginatedUsers(
     filters: CrmFilterOptions,

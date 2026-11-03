@@ -18,7 +18,7 @@ const Dashboard = () => {
     }
     dispatch(clearCredentials());
     toast.success('Logged out');
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   return (

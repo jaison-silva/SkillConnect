@@ -1,8 +1,12 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 import { inject, injectable } from 'inversify';
+import { HttpStatus, UserRole } from '../constants/enums.js';
+import { RESPONSE_MESSAGES } from '../constants/messages.js';
 import { TYPES } from '../constants/types.js';
 import type { IUserRepository } from '../interface/IUserRepository.js';
+import type { IEmailService } from '../interface/IEmailService.js';
 
 import type {
     AuthTokensResponse,
@@ -11,6 +15,7 @@ import type {
 
 import {
     ForgotPasswordDTO,
+    GoogleAuthDTO,
     LoginDTO,
     RegisterDTO,
     ResendOtpDTO,
@@ -21,12 +26,13 @@ import {
 import { AppError } from '../utils/AppError.js';
 import { logger } from '../utils/logger.js';
 
-
-
 @injectable()
 export class AuthService implements IAuthService {
+    private readonly _googleClient = new OAuth2Client();
+
     constructor(
-        @inject(TYPES.UserRepository) private readonly _userRepo: IUserRepository
+        @inject(TYPES.UserRepository) private readonly _userRepo: IUserRepository,
+        @inject(TYPES.EmailService) private readonly _emailService: IEmailService
     ) { }
 
     private async _generateOtpPayload(ttlMinutes = 5) {
@@ -40,7 +46,10 @@ export class AuthService implements IAuthService {
     async register(data: RegisterDTO) {
         const existing = await this._userRepo.findByEmail(data.email);
         if (existing) {
-            throw new AppError('Email is already registered.', 409);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.EMAIL_ALREADY_REGISTERED,
+                HttpStatus.CONFLICT
+            );
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -58,6 +67,8 @@ export class AuthService implements IAuthService {
 
         logger.info(`Registered new ${user.role}: ${user.email}`);
 
+        await this._emailService.sendOtpEmail(user.email, otpCode, 'verification');
+
         return {
             userId: String(user._id),
             email: user.email,
@@ -69,25 +80,38 @@ export class AuthService implements IAuthService {
     async login(data: LoginDTO): Promise<AuthTokensResponse> {
         const user = await this._userRepo.findByEmail(data.email);
         if (!user) {
-            throw new AppError('Invalid email or password.', 401);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.INVALID_CREDENTIALS,
+                HttpStatus.UNAUTHORIZED
+            );
         }
 
         if (user.isBlocked) {
             throw new AppError(
-                'Your account has been suspended by an administrator.',
-                403
+                RESPONSE_MESSAGES.AUTH.ACCOUNT_SUSPENDED,
+                HttpStatus.FORBIDDEN
+            );
+        }
+
+        if (!user.passwordHash) {
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.PASSWORD_LOGIN_UNAVAILABLE,
+                HttpStatus.BAD_REQUEST
             );
         }
 
         const isMatch = await bcrypt.compare(data.password, user.passwordHash);
         if (!isMatch) {
-            throw new AppError('Invalid email or password.', 401);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.INVALID_CREDENTIALS,
+                HttpStatus.UNAUTHORIZED
+            );
         }
 
         if (!user.isVerified) {
             throw new AppError(
-                'Please verify your email via OTP before logging in.',
-                403
+                RESPONSE_MESSAGES.AUTH.EMAIL_NOT_VERIFIED,
+                HttpStatus.FORBIDDEN
             );
         }
 
@@ -114,17 +138,26 @@ export class AuthService implements IAuthService {
     async verifyOtp(data: VerifyOtpDTO) {
         const user = await this._userRepo.findByEmail(data.email);
         if (!user || !user.otp?.codeHash || !user.otp?.expiresAt) {
-            throw new AppError('No active OTP request found for this email.', 400);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.OTP_REQUIRED,
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         if (user.otp.expiresAt < new Date()) {
-            throw new AppError('OTP has expired. Please request a new one.', 400);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.OTP_EXPIRED,
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         const isValid = await bcrypt.compare(data.otp, user.otp.codeHash);
         console.log(`OTP verification for ${data.email}: ${isValid ? 'valid' : 'invalid'}`);
         if (!isValid) {
-            throw new AppError('Invalid OTP code.', 400);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.OTP_INVALID,
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         await this._userRepo.updateById(String(user._id), {
@@ -132,13 +165,16 @@ export class AuthService implements IAuthService {
             $unset: { otp: 1 },
         });
 
-        return { message: 'Account verified successfully.' };
+        return { message: RESPONSE_MESSAGES.AUTH.OTP_VERIFIED_SUCCESS };
     }
 
     async resendOtp(data: ResendOtpDTO) {
         const user = await this._userRepo.findByEmail(data.email);
         if (!user) {
-            throw new AppError('User not found.', 404);
+            throw new AppError(
+                RESPONSE_MESSAGES.USER.NOT_FOUND,
+                HttpStatus.NOT_FOUND
+            );
         }
 
         const { otpCode, codeHash, expiresAt } = await this._generateOtpPayload(5);
@@ -147,8 +183,10 @@ export class AuthService implements IAuthService {
             otp: { codeHash, expiresAt },
         });
 
+        await this._emailService.sendOtpEmail(user.email, otpCode, 'verification');
+
         return {
-            message: 'A new 6-digit OTP has been sent.',
+            message: RESPONSE_MESSAGES.AUTH.OTP_RESENT_SUCCESS,
             debugOtp: otpCode,
         };
     }
@@ -157,7 +195,7 @@ export class AuthService implements IAuthService {
         const user = await this._userRepo.findByEmail(data.email);
         if (!user) {
             return {
-                message: 'If that email is registered, a reset OTP has been sent.',
+                message: RESPONSE_MESSAGES.AUTH.PASSWORD_RESET_IF_REGISTERED,
             };
         }
 
@@ -167,8 +205,10 @@ export class AuthService implements IAuthService {
             otp: { codeHash, expiresAt },
         });
 
+        await this._emailService.sendOtpEmail(user.email, otpCode, 'password-reset');
+
         return {
-            message: 'Password reset OTP sent (valid for 10 minutes).',
+            message: RESPONSE_MESSAGES.AUTH.PASSWORD_RESET_OTP_SENT,
             debugOtp: otpCode,
         };
     }
@@ -176,16 +216,25 @@ export class AuthService implements IAuthService {
     async resetPassword(data: ResetPasswordDTO) {
         const user = await this._userRepo.findByEmail(data.email);
         if (!user || !user.otp?.codeHash || !user.otp?.expiresAt) {
-            throw new AppError('Invalid or expired password reset request.', 400);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.RESET_OTP_INVALID_OR_EXPIRED,
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         if (user.otp.expiresAt < new Date()) {
-            throw new AppError('Reset OTP has expired.', 400);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.RESET_OTP_EXPIRED,
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         const isValid = await bcrypt.compare(data.otp, user.otp.codeHash);
         if (!isValid) {
-            throw new AppError('Invalid reset OTP code.', 400);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.RESET_OTP_INVALID,
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -197,12 +246,15 @@ export class AuthService implements IAuthService {
             $unset: { otp: 1 },
         });
 
-        return { message: 'Password has been reset successfully.' };
+        return { message: RESPONSE_MESSAGES.AUTH.PASSWORD_RESET_SUCCESS };
     }
 
     async refreshAccessToken(refreshToken: string) {
         if (!refreshToken) {
-            throw new AppError('Refresh token is missing.', 401);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.REFRESH_TOKEN_MISSING,
+                HttpStatus.UNAUTHORIZED
+            );
         }
 
         const refreshSecret = process.env.JWT_REFRESH_SECRET || 'refresh_secret';
@@ -216,7 +268,10 @@ export class AuthService implements IAuthService {
 
             const user = await this._userRepo.findById(decoded.id);
             if (!user || user.isBlocked) {
-                throw new AppError('User no longer active or blocked.', 403);
+                throw new AppError(
+                    RESPONSE_MESSAGES.AUTH.USER_NOT_ACTIVE_OR_BLOCKED,
+                    HttpStatus.FORBIDDEN
+                );
             }
 
             const accessToken = jwt.sign(
@@ -227,7 +282,92 @@ export class AuthService implements IAuthService {
 
             return { accessToken };
         } catch {
-            throw new AppError('Invalid or expired refresh token.', 401);
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.REFRESH_TOKEN_INVALID,
+                HttpStatus.UNAUTHORIZED
+            );
         }
+    }
+
+    async googleAuth(data: GoogleAuthDTO): Promise<AuthTokensResponse> {
+        const googleClientId = process.env.GOOGLE_CLIENT_ID;
+        let payload;
+
+        try {
+            const ticket = await this._googleClient.verifyIdToken({
+                idToken: data.credential,
+                audience: googleClientId || undefined,
+            });
+            payload = ticket.getPayload();
+        } catch (error) {
+            logger.error(
+                `Google token verification failed: ${error instanceof Error ? error.message : String(error)}`
+            );
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.GOOGLE_TOKEN_INVALID,
+                HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        if (!payload || !payload.email) {
+            throw new AppError(
+                RESPONSE_MESSAGES.AUTH.GOOGLE_TOKEN_INVALID,
+                HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        const email = payload.email.toLowerCase();
+        const googleId = payload.sub;
+        const name = payload.name || payload.given_name || email.split('@')[0];
+
+        let user = await this._userRepo.findByGoogleId(googleId);
+        if (!user) {
+            user = await this._userRepo.findByEmail(email);
+            if (user) {
+                await this._userRepo.updateById(String(user._id), {
+                    googleId,
+                    isVerified: true,
+                });
+                user.googleId = googleId;
+                user.isVerified = true;
+            }
+        }
+
+        if (user) {
+            if (user.isBlocked) {
+                throw new AppError(
+                    RESPONSE_MESSAGES.AUTH.ACCOUNT_SUSPENDED,
+                    HttpStatus.FORBIDDEN
+                );
+            }
+        } else {
+            user = await this._userRepo.create({
+                name,
+                email,
+                role: data.role || UserRole.CLIENT,
+                googleId,
+                isVerified: true,
+            });
+            logger.info(`Registered new user via Google: ${user.email} (${user.role})`);
+        }
+
+        const accessSecret = process.env.JWT_ACCESS_SECRET || 'access_secret';
+        const refreshSecret = process.env.JWT_REFRESH_SECRET || 'refresh_secret';
+
+        const tokenPayload = { id: String(user._id), role: user.role };
+        const accessToken = jwt.sign(tokenPayload, accessSecret, { expiresIn: '15m' });
+        const refreshToken = jwt.sign(tokenPayload, refreshSecret, { expiresIn: '7d' });
+
+        return {
+            user: {
+                id: String(user._id),
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                isVerified: user.isVerified,
+            },
+            accessToken,
+            refreshToken,
+        };
     }
 }

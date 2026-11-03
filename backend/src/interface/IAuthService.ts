@@ -1,5 +1,6 @@
 import {
   ForgotPasswordDTO,
+  GoogleAuthDTO,
   LoginDTO,
   RegisterDTO,
   ResendOtpDTO,
@@ -36,4 +37,5 @@ export interface IAuthService {
   ): Promise<{ message: string; debugOtp?: string }>;
   resetPassword(data: ResetPasswordDTO): Promise<{ message: string }>;
   refreshAccessToken(refreshToken: string): Promise<{ accessToken: string }>;
+  googleAuth(data: GoogleAuthDTO): Promise<AuthTokensResponse>;
 }

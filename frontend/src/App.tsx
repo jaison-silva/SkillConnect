@@ -67,7 +67,14 @@ function App() {
                 </PublicOnlyRoute>
               }
             />
-            <Route path="/verify-otp" element={<VerifyOtpPage />} />
+            <Route
+              path="/verify-otp"
+              element={
+                <PublicOnlyRoute>
+                  <VerifyOtpPage />
+                </PublicOnlyRoute>
+              }
+            />
             <Route
               path="/forgot-password"
               element={
@@ -76,7 +83,14 @@ function App() {
                 </PublicOnlyRoute>
               }
             />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/reset-password"
+              element={
+                <PublicOnlyRoute>
+                  <ResetPasswordPage />
+                </PublicOnlyRoute>
+              }
+            />
 
             {/* Protected app routes */}
             <Route

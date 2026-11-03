@@ -3,6 +3,7 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Length,
   MinLength,
@@ -71,4 +72,17 @@ export class ResetPasswordDTO {
   @IsString()
   @MinLength(6, { message: 'New password must be at least 6 characters long' })
   newPassword!: string;
+}
+
+export class GoogleAuthDTO {
+  @IsString()
+  @IsNotEmpty({ message: 'Google credential is required' })
+  credential!: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.toUpperCase() : value))
+  @IsEnum(UserRole, {
+    message: 'Role must be one of: CLIENT, PROVIDER, ADMIN',
+  })
+  role?: UserRole;
 }

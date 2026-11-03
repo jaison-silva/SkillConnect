@@ -55,6 +55,11 @@ export interface LoginResponse {
   accessToken: string;
 }
 
+export interface GoogleAuthRequest {
+  credential: string;
+  role?: UserRole;
+}
+
 export interface VerifyOtpRequest {
   email: string;
   otp: string;

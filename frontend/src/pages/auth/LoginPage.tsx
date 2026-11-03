@@ -1,17 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useLoginMutation } from '../../store/api/authApi';
 import { setCredentials } from '../../store/slices/authSlice';
-import { useAppDispatch } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import PasswordInput from '../../components/PasswordInput';
+import GoogleAuthButton from '../../components/GoogleAuthButton';
 import { validateEmail, validatePassword } from '../../utils/validation';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { isAuthenticated, user: currentUser } = useAppSelector((state) => state.auth);
   const [login, { isLoading }] = useLoginMutation();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(currentUser?.role === 'ADMIN' ? '/admin/users' : '/', { replace: true });
+    }
+  }, [isAuthenticated, currentUser, navigate]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,7 +53,7 @@ const LoginPage = () => {
       const { user, accessToken } = res.data;
       dispatch(setCredentials({ user, accessToken }));
       toast.success(`Welcome back, ${user.name}!`);
-      navigate(user.role === 'ADMIN' ? '/admin/users' : '/');
+      navigate(user.role === 'ADMIN' ? '/admin/users' : '/', { replace: true });
     } catch (err: unknown) {
       const message =
         (err as { data?: { message?: string } })?.data?.message ||
@@ -104,6 +112,8 @@ const LoginPage = () => {
         <button type="submit" className="btn btn-primary" disabled={isLoading}>
           {isLoading ? 'Signing in…' : 'Sign In'}
         </button>
+
+        <GoogleAuthButton mode="login" />
 
         <div className="form-links">
           <p>

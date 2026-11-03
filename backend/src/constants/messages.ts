@@ -1,0 +1,50 @@
+export const RESPONSE_MESSAGES = {
+  AUTH: {
+    REGISTER_SUCCESS: 'Registered successfully.',
+    LOGIN_SUCCESS: 'Logged in successfully.',
+    LOGOUT_SUCCESS: 'Logged out successfully.',
+    EMAIL_ALREADY_REGISTERED: 'Email is already registered.',
+    INVALID_CREDENTIALS: 'Invalid email or password.',
+    ACCOUNT_SUSPENDED: 'Your account has been suspended by an administrator.',
+    EMAIL_NOT_VERIFIED: 'Please verify your email via OTP before logging in.',
+    OTP_REQUIRED: 'No active OTP request found for this email.',
+    OTP_EXPIRED: 'OTP has expired. Please request a new one.',
+    OTP_INVALID: 'Invalid OTP code.',
+    OTP_VERIFIED_SUCCESS: 'Account verified successfully.',
+    OTP_RESENT_SUCCESS: 'A new 6-digit OTP has been sent.',
+    PASSWORD_RESET_OTP_SENT: 'Password reset OTP sent (valid for 10 minutes).',
+    PASSWORD_RESET_IF_REGISTERED: 'If that email is registered, a reset OTP has been sent.',
+    RESET_OTP_INVALID_OR_EXPIRED: 'Invalid or expired password reset request.',
+    RESET_OTP_EXPIRED: 'Reset OTP has expired.',
+    RESET_OTP_INVALID: 'Invalid reset OTP code.',
+    PASSWORD_RESET_SUCCESS: 'Password has been reset successfully.',
+    REFRESH_TOKEN_MISSING: 'Refresh token is missing.',
+    REFRESH_TOKEN_INVALID: 'Invalid or expired refresh token.',
+    USER_NOT_ACTIVE_OR_BLOCKED: 'User no longer active or blocked.',
+    AUTH_REQUIRED: 'Authentication required. Please provide a Bearer token.',
+    ACCESS_TOKEN_MISSING: 'Access token is missing.',
+    ACCESS_TOKEN_INVALID: 'Invalid or expired access token.',
+    PASSWORD_LOGIN_UNAVAILABLE:
+      'This account was registered using Google. Please log in with Google.',
+    GOOGLE_AUTH_FAILED: 'Google authentication failed.',
+    GOOGLE_TOKEN_INVALID: 'Invalid or unverified Google token.',
+    GOOGLE_LOGIN_SUCCESS: 'Logged in with Google successfully.',
+    USER_NOT_AUTHENTICATED: 'User is not authenticated.',
+    ACCESS_DENIED: (roles: string[]): string =>
+      `Access denied. Requires one of the following roles: ${roles.join(', ')}`,
+  },
+  USER: {
+    NOT_FOUND: 'User not found.',
+    CANNOT_BLOCK_ADMIN: 'Cannot block an ADMIN account.',
+    USER_BLOCKED_SUCCESS: 'User has been blocked successfully.',
+    USER_UNBLOCKED_SUCCESS: 'User has been unblocked successfully.',
+    USER_STATUS_UPDATED: (isBlocked: boolean): string =>
+      `User has been ${isBlocked ? 'blocked' : 'unblocked'} successfully.`,
+  },
+  SYSTEM: {
+    INTERNAL_SERVER_ERROR: 'Internal server error',
+    VALIDATION_FAILED: 'Validation failed',
+    API_HEALTH_RUNNING:
+      'SkillConnect API is running cleanly with Inversify & N-Tier Architecture',
+  },
+} as const;

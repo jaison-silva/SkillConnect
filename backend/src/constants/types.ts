@@ -5,6 +5,7 @@ export const TYPES = {
   // Services
   AuthService: Symbol.for('AuthService'),
   AdminCrmService: Symbol.for('AdminCrmService'),
+  EmailService: Symbol.for('EmailService'),
 
   // Controllers
   AuthController: Symbol.for('AuthController'),

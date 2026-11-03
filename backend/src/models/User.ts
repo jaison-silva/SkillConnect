@@ -4,7 +4,7 @@ import { UserRole } from '../constants/enums.js';
 export interface IUser extends Document {
   name: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   role: UserRole;
   googleId?: string;
   isVerified: boolean;
@@ -37,7 +37,7 @@ const UserSchema: Schema<IUser> = new Schema(
       lowercase: true,
       trim: true,
     },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, required: false },
     role: {
       type: String,
       enum: Object.values(UserRole),

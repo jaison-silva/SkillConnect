@@ -1,4 +1,6 @@
- import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { HttpStatus } from '../constants/enums.js';
+import { RESPONSE_MESSAGES } from '../constants/messages.js';
 import { AppError } from '../utils/AppError.js';
 import { logger } from '../utils/logger.js';
 
@@ -21,8 +23,8 @@ export const errorHandler = (
     `[${req.method}] ${req.originalUrl} -> Unexpected Error: ${err.stack || err.message}`
   );
 
-  res.status(500).json({
+  res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
     status: 'error',
-    message: 'Internal server error',
+    message: RESPONSE_MESSAGES.SYSTEM.INTERNAL_SERVER_ERROR,
   });
 };

@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import './config/db.js';
+import { HttpStatus } from './constants/enums.js';
+import { RESPONSE_MESSAGES } from './constants/messages.js';
 import { logger, morganStream } from './utils/logger.js';
 import authRoutes from './routes/auth.routes.js';
 import crmRoutes from './routes/crm.routes.js';
@@ -26,9 +28,9 @@ app.use(morgan('combined', { stream: morganStream }));
 
 // Health Check Endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
-  res.status(200).json({
+  res.status(HttpStatus.OK).json({
     status: 'active',
-    message: 'SkillConnect API is running cleanly with Inversify & N-Tier Architecture',
+    message: RESPONSE_MESSAGES.SYSTEM.API_HEALTH_RUNNING,
   });
 });
 

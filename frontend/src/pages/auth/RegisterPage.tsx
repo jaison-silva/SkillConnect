@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useRegisterMutation } from '../../store/api/authApi';
 import { UserRole } from '../../types';
 import PasswordInput from '../../components/PasswordInput';
+import GoogleAuthButton from '../../components/GoogleAuthButton';
 import {
   validateName,
   validateEmail,
@@ -70,7 +71,10 @@ const RegisterPage = () => {
       } else {
         toast.success('Registration successful. Please check your email for OTP.');
       }
-      navigate('/verify-otp', { state: { email: email.trim().toLowerCase() } });
+      navigate('/verify-otp', {
+        state: { email: email.trim().toLowerCase() },
+        replace: true,
+      });
     } catch (err: unknown) {
       const message =
         (err as { data?: { message?: string } })?.data?.message ||
@@ -190,6 +194,8 @@ const RegisterPage = () => {
         <button type="submit" className="btn btn-primary" disabled={isLoading}>
           {isLoading ? 'Creating account…' : 'Register'}
         </button>
+
+        <GoogleAuthButton mode="signup" role={role} />
 
         <div className="form-links">
           <p>

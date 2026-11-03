@@ -37,6 +37,7 @@ const ForgotPasswordPage = () => {
       }
       navigate('/reset-password', {
         state: { email: email.trim().toLowerCase() },
+        replace: true,
       });
     } catch (err: unknown) {
       const message =

@@ -5,6 +5,7 @@ import { AuthController } from '../controllers/AuthController.js';
 import { validateDto } from '../middlewares/validate.middleware.js';
 import {
     ForgotPasswordDTO,
+    GoogleAuthDTO,
     LoginDTO,
     RegisterDTO,
     ResendOtpDTO,
@@ -17,6 +18,7 @@ const authController = container.get<AuthController>(TYPES.AuthController);
 
 router.post('/register', validateDto(RegisterDTO), authController.register);
 router.post('/login', validateDto(LoginDTO), authController.login);
+router.post('/google', validateDto(GoogleAuthDTO), authController.googleLogin);
 router.post('/verify-otp', validateDto(VerifyOtpDTO), authController.verifyOtp);
 router.post('/resend-otp', validateDto(ResendOtpDTO), authController.resendOtp);
 

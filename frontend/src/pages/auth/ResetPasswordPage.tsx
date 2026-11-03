@@ -67,7 +67,7 @@ const ResetPasswordPage = () => {
         newPassword,
       }).unwrap();
       toast.success(res.data?.message || 'Password reset successfully!');
-      navigate('/login');
+      navigate('/login', { replace: true });
     } catch (err: unknown) {
       const message =
         (err as { data?: { message?: string } })?.data?.message ||

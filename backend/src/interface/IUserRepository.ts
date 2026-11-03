@@ -18,6 +18,7 @@ export interface IUserRepository {
   create(data: Partial<IUser>): Promise<IUser>;
   findById(id: string): Promise<IUser | null>;
   findByEmail(email: string): Promise<IUser | null>;
+  findByGoogleId(googleId: string): Promise<IUser | null>;
   updateById(id: string, update: UpdateQuery<IUser>): Promise<IUser | null>;
   deleteById(id: string): Promise<IUser | null>;
   findPaginatedUsers(

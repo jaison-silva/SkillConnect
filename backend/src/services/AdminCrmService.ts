@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../constants/types.js';
-import { UserRole } from '../constants/enums.js';
+import { HttpStatus, UserRole } from '../constants/enums.js';
+import { RESPONSE_MESSAGES } from '../constants/messages.js';
 
 import type {
   CrmFilterOptions,
@@ -60,22 +61,28 @@ export class AdminCrmService implements IAdminCrmService {
   async toggleBlockUser(userId: string) {
     const user = await this._userRepo.findById(userId);
     if (!user) {
-      throw new AppError('User not found.', 404);
+      throw new AppError(
+        RESPONSE_MESSAGES.USER.NOT_FOUND,
+        HttpStatus.NOT_FOUND
+      );
     }
 
     if (user.role === UserRole.ADMIN) {
-      throw new AppError('Cannot block an ADMIN account.', 403);
+      throw new AppError(
+        RESPONSE_MESSAGES.USER.CANNOT_BLOCK_ADMIN,
+        HttpStatus.FORBIDDEN
+      );
     }
 
     const updated = await this._userRepo.updateById(userId, {
       isBlocked: !user.isBlocked,
     });
 
-    const statusText = updated?.isBlocked ? 'blocked' : 'unblocked';
+    const isBlocked = Boolean(updated?.isBlocked);
     return {
       userId: String(updated?._id),
-      isBlocked: Boolean(updated?.isBlocked),
-      message: `User has been ${statusText} successfully.`,
+      isBlocked,
+      message: RESPONSE_MESSAGES.USER.USER_STATUS_UPDATED(isBlocked),
     };
   }
 }
